@@ -126,8 +126,7 @@ char *argv[];
 
 
     if(myid == source){
-      //out.value = 15;
-      //out.value = 19;
+      
       mini[0]=15;
       mini[1]=myid;
       begin = clock();
