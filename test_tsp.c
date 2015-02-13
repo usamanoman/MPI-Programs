@@ -48,17 +48,18 @@ char buff[3];
 */
 if (i == n) {
 	char *res;
-	res = (char *)malloc(sizeof(buff)+4+3);
+	res = (char *)malloc(sizeof(buff)+10);
 	strcpy(res,"");
-	for (j=0; j<n-1; j++){
+	for (j=0; j<n; j++){
 		snprintf(buff,sizeof(buff),"%d-",v[j]);
 		strcat(res,buff);
-		scores[count+(myid *6)]=scores[count+(myid *6)]+graph[v[j]][v[j+1]];
+		if(j==n-1)
+		scores[count+(myid*2)]=scores[count+(myid*2)]+graph[v[j]][0];
+		else
+		scores[count+(myid *2)]=scores[count+(myid *2)]+graph[v[j]][v[j+1]];
 	}
 	res[strlen(res)]=res[0];
 	result[count]=res;
-	//snprintf(result[count + (myid * 6 )],strlen(result[count+(myid*6)]),"%s", res);
-	//printf ("(%d, %d , %s)\n",scores[count+(myid *6)],myid,result[count]);
 	count++;
 } else
 /* recursively explore the permutations starting
@@ -110,17 +111,17 @@ char *argv[];
 	int allmini_with_loc[2]={65,65};
 	int allLocation[4];
 	int graph[4][4]={
-	{0,2,9,2},
-	{3,0,5,3},
-	{2,4,0,2},
-	{5,6,5,0}
+	{0,1,3,8},
+	{5,0,2,6},
+	{1,18,0,10},
+	{7,4,12,0}
 	};
 	for (i=0; i<4; i++) v[i] = i;
-	int scores[24];
-	for(i=0;i<24;i++){
+	int scores[6];
+	for(i=0;i<6;i++){
 		scores[i]=0;
 	}
-	char * result[6];
+	char * result[2];
 	if(myid == source){
 		printf("The graph is:\n");
 		for(i=0;i<4;i++){
@@ -133,27 +134,27 @@ char *argv[];
 		printf("Enter a number:");
 		scanf("%d",&buffer);
 		for(i = 1 ; i < numprocs ; i++){
-			MPI_Send(&scores[(i-1)*6],6,MPI_INT,i,tag+1,MPI_COMM_WORLD);
+			MPI_Send(&scores[(i-1)*2],2,MPI_INT,i,tag+1,MPI_COMM_WORLD);
 			MPI_Send(&buffer,count,MPI_INT,i,tag,MPI_COMM_WORLD);
 		}
 		for(i = 1 ; i < numprocs ; i++){
-			MPI_Recv(&scores[(i-1)*6],6,MPI_INT,i,tag+2,MPI_COMM_WORLD,&status);
+			MPI_Recv(&scores[(i-1)*2],2,MPI_INT,i,tag+2,MPI_COMM_WORLD,&status);
 		}
 		MPI_Barrier(MPI_COMM_WORLD);
 		
 	}
 	if(myid != 0){
-		MPI_Recv(&scores[(myid-1) * 6],6,MPI_INT,source,tag+1,MPI_COMM_WORLD,&status);
+		MPI_Recv(&scores[(myid-1) * 2],2,MPI_INT,source,tag+1,MPI_COMM_WORLD,&status);
 		MPI_Recv(&buffer,count,MPI_INT,source,tag,MPI_COMM_WORLD,&status);
 
-		swap(v,0,myid-1);
-		perm (v, buffer, 1,scores,graph,myid-1,result);
-		location=find_min(&scores[(myid-1)*6],6);
-		mini_with_loc[0] = scores[((myid - 1 ) * 6 ) + location];
+		swap(v,1,myid);
+		perm (v, buffer, 2,scores,graph,myid-1,result);
+		location=find_min(&scores[(myid-1)*2],2);
+		mini_with_loc[0] = scores[((myid - 1 ) * 2 ) + location];
 		mini_with_loc[1] =location;
-		mini_with_rank[0] = scores[((myid - 1 ) * 6 ) + location];
+		mini_with_rank[0] = scores[((myid - 1 ) * 2 ) + location];
 		mini_with_rank[1] =myid;
-		MPI_Send(&scores[(myid-1)*6],6,MPI_INT,0,tag+2,MPI_COMM_WORLD);
+		MPI_Send(&scores[(myid-1)*2],2,MPI_INT,0,tag+2,MPI_COMM_WORLD);
 		MPI_Barrier(MPI_COMM_WORLD);
 		
 	}
