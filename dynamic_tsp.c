@@ -31,7 +31,7 @@ int find_min(int * array,int size)
 }
 
 /* recursive function to generate permutations */
-void perm (int v[], int n, int i,int scores[],int graph[][4],int myid,char * result[]) {
+void perm (int v[], int n, int i,int scores[],int** graph,int myid,char * result[]) {
 	static int count=0;
 	int j;
 	char buff[3];
@@ -101,7 +101,7 @@ char *argv[];
 	source=0;
 	destination=1;
 	count=1;
-	int v[4], i,j;
+	int v[4];
 	int location=0;
 	int mini_with_rank[2]={65,65};
 	int allmini_with_rank[2]={65,65};
@@ -136,7 +136,7 @@ char *argv[];
 	if(myid != 0){
 		MPI_Recv(&buffer,count,MPI_INT,source,tag,MPI_COMM_WORLD,&status);
 		swap(v,1,myid);
-		perm (v, buffer, 2,scores,graph,myid-1,result);
+		perm (v, buffer, 2,scores,matrics,myid-1,result);
 		location=find_min(&scores[(myid-1)*2],2);
 		mini_with_loc[0] = scores[((myid - 1 ) * 2 ) + location];
 		mini_with_loc[1] =location;
