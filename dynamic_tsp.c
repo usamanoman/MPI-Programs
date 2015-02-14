@@ -72,8 +72,7 @@ char *argv[];
     int i=0;
     int j=0;
     fscanf(ifp, "%d", &size);
-    printf("%d\n",size);
-
+    
     int** matrics;
 
     matrics = malloc(size* sizeof(int*));
@@ -103,17 +102,17 @@ char *argv[];
 	count=1;
 	int v[4];
 	int location=0;
-	int mini_with_rank[2]={65,65};
-	int allmini_with_rank[2]={65,65};
-	int mini_with_loc[2]={65,65};
-	int allmini_with_loc[2]={65,65};
+	unsigned int mini_with_rank[2]={4294967295,4294967295};
+	unsigned int allmini_with_rank[2]={4294967295,4294967295};
+	unsigned int mini_with_loc[2]={4294967295,4294967295};
+	unsigned int allmini_with_loc[2]={4294967295,4294967295};
 
 	
 	for (i=0; i<4; i++) v[i] = i;
 	int *scores;
 	scores = malloc(values* sizeof(int*));
 
-	char * result;
+	char **result;
 	result=malloc((values/numprocs)* sizeof(char*));
 
 	if(myid == source){
@@ -126,17 +125,13 @@ char *argv[];
 		begin = clock();
 		buffer=size;
 		for(i = 1 ; i < numprocs ; i++){
-			MPI_Send(&buffer,count,MPI_INT,i,tag,MPI_COMM_WORLD);
-		}
-		for(i = 1 ; i < numprocs ; i++){
 			MPI_Recv(&scores[(i-1)*2],2,MPI_INT,i,tag+2,MPI_COMM_WORLD,&status);
 		}
 		MPI_Barrier(MPI_COMM_WORLD);
 	}
 	if(myid != 0){
-		MPI_Recv(&buffer,count,MPI_INT,source,tag,MPI_COMM_WORLD,&status);
 		swap(v,1,myid);
-		perm (v, buffer, 2,scores,matrics,myid-1,result);
+		perm (v,size, 2,scores,matrics,myid-1,result);
 		location=find_min(&scores[(myid-1)*2],2);
 		mini_with_loc[0] = scores[((myid - 1 ) * 2 ) + location];
 		mini_with_loc[1] =location;
