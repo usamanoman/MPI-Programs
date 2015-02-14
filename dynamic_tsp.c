@@ -84,14 +84,9 @@ char *argv[];
         for(j=0;j<size;j++)
             fscanf(ifp,"%d",&matrics[i][j]);
 
-    
-
     int values=1;
     for(i=size-1;i>0;i--)
         values *= i;
-
-    //printf("\n%d",values);
-
 
 	clock_t begin, end;
 	double time_spent;
@@ -112,14 +107,15 @@ char *argv[];
 	int allmini_with_rank[2]={65,65};
 	int mini_with_loc[2]={65,65};
 	int allmini_with_loc[2]={65,65};
-	int allLocation[4];
+
 	
 	for (i=0; i<4; i++) v[i] = i;
-	int scores[6];
-	for(i=0;i<6;i++){
-		scores[i]=0;
-	}
-	char * result[2];
+	int *scores;
+	scores = malloc(values* sizeof(int*));
+
+	char * result;
+	result=malloc((values/numprocs)* sizeof(char*));
+
 	if(myid == source){
 		printf("The graph is:\n");
 		for(i=0;i<size;i++){
@@ -128,8 +124,6 @@ char *argv[];
 	        printf("\n");
 	    }
 		begin = clock();
-		/*printf("Enter a number:");
-		scanf("%d",&buffer);*/
 		buffer=size;
 		for(i = 1 ; i < numprocs ; i++){
 			MPI_Send(&buffer,count,MPI_INT,i,tag,MPI_COMM_WORLD);
