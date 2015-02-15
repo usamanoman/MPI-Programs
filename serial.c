@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
+#include <mpi.h>
+#include <math.h>
 int find_min(int * array,int size)
 {
 	int c=0;
@@ -45,8 +46,12 @@ void perm (int v[], int n, int i,int * scores,int **graph) {
 		}
 }
 
-int main () {
-
+int main(argc,argv)
+int argc;
+char *argv[];
+{
+	int numprocs,myid;
+	double sTime,eTime,pTime;
 	FILE *ifp;
     ifp = fopen("matrics.txt", "r");
     if (ifp == NULL) {
@@ -71,7 +76,13 @@ int main () {
     int values=1;
     for(i=size-1;i>0;i--)
         values *= i;
+        
+        MPI_Status status;
+	MPI_Init(&argc,&argv);
+	MPI_Comm_size(MPI_COMM_WORLD,&numprocs);
+	MPI_Comm_rank(MPI_COMM_WORLD,&myid);
 
+    sTime=MPI_Wtime();
 
     int *v;
     v=malloc(size * sizeof(int*));
@@ -90,4 +101,10 @@ int main () {
     int location=0;
     location=find_min(scores,values);
     printf("Min value : %d\n",scores[location]);
+    
+    eTime=MPI_Wtime();
+    pTime= fabs(eTime-sTime);
+    printf("Time Spend %5.6e\n",pTime);
+    MPI_Finalize();
+    return 0;
 }
